@@ -1,8 +1,8 @@
 package Set::Bag;
 
-# $Id: Bag.pm,v 1.9 1998/10/06 09:33:13 jhi Exp jhi $
+# $Id: Bag.pm,v 1.4 1999/01/29 11:33:47 jhi Exp $
 
-$VERSION = 1.006;
+$VERSION = 1.007;
 
 =pod
 
@@ -27,8 +27,8 @@ $VERSION = 1.006;
     $bag_b->insert(cherries => 1, $bag_c);
 
     my @b_elements = $bag_b->elements;	# ('apples','cherries','mangos')
-    my @a_grab_all = $bag_a->grab;	# (apples => 3, oranges => 4)
     my @b_grab_app = $bag_b->grab('apples', 'cherries'); # (3, 1)
+    my @a_grab_all = $bag_a->grab;	# (apples => 3, oranges => 4)
 
     print "bag_a     sum      bag_b = ", $bag_b->sum($bag_b),          "\n";
     print "bag_a  difference  bag_b = ", $bag_b->difference($bag_b),   "\n";
@@ -48,7 +48,7 @@ $VERSION = 1.006;
     print "bag_b = $bag_b\n";
 
     print "bag_a + bag_b = ", $bag_b + $bag_b, "\n";	# Sum
-    print "bag_a - bag_b = ", $bag_b + $bag_b, "\n";	# Difference
+    print "bag_a - bag_b = ", $bag_b - $bag_b, "\n";	# Difference
 
     print "bag_a | bag_b = ", $bag_a | $bag_b, "\n";	# Union
     print "bag_a & bag_b = ", $bag_a & $bag_b, "\n";	# Intersection
@@ -80,31 +80,35 @@ A bag may contain one or more instances of elements.  One may add and
 delete one or more instances at a time.
 
 If one attempts to delete more instances than there are to delete
-from, the default behavious of B<delete> is to abort.  The
-B<over_delete> can be used to control this behaviour.
+from, the default behavious of B<delete> is to raise an exception.
+The B<over_delete> method can be used to control this behaviour.
 
 Inserting or removing negative number of instances translates into
 removing or inserting positive number of instances, respectively.
 
-The B<sum> is something called the I<additive union>.  It leaves in
+The B<sum> is also known as the I<additive union>.  It leaves in
 the result bag the sum of all the instances of all bags.
 
-Before the B<difference> you most probably will need the B<over_delete>.
+Before using the B<difference> you very often will need the B<over_delete>.
 
-The B<union> is something called the I<maximal union>.  It leaves in
+The B<union> is also known as the I<maximal union>.  It leaves in
 the result bag the maximal number of instances in all bags.
 
 The B<intersection> leaves in the result bag only the elements that
 have instances in all bags and of those the minimal number of instances.
 
 The B<complement> will leave in the result bag the maximal number of
-instances ever seen (via B<new>, B<insert>, B<sum>, or B<maximize>)
-minus the number of instances in the complemented bag.
+instances I<ever> seen (via B<new>, B<insert>, B<sum>, or B<maximize>)
+in the bag minus the current number of instances in the bag.
+
+The B<grab> method returns the contents of a bag.
+If used with parameters the parameters are the elements and their
+number of instances in the bag are returned.  If an element that
+does not exist in the bag is grabbed for,
+the number of instances returned for that element will be C<undef>.
+If used without parameters the elements are returned in pseudorandom order.
 
 =head1 NOTES
-
-The contents of a bag will be returned from the parameterless B<grab>
-in pseudorandom order.
 
 Beware the low precedence of C<|> and C<&> compared with C<eq> and C<ne>.
 
