@@ -1,8 +1,8 @@
 package Set::Bag;
 
-# $Id: Bag.pm,v 1.7 1998/10/04 18:45:06 jhi Exp jhi $
+# $Id: Bag.pm,v 1.8 1998/10/05 19:09:53 jhi Exp jhi $
 
-$VERSION = 1.002;
+$VERSION = 1.004;
 
 =pod
 
@@ -22,7 +22,7 @@ $VERSION = 1.002;
     # Methods
 
     $bag_b->insert(apples => 1);
-    $bag_b->remove(mangos => 1);
+    $bag_b->delete(mangos => 1);
 
     $bag_b->insert(cherries => 1, $bag_c);
 
@@ -41,7 +41,7 @@ $VERSION = 1.002;
     print "bag_a = $bag_a\n";		# (apples => 3, oranges => 4)
 
     $bag_b += $bag_c;					# Insert
-    $bag_b -= $bag_d;					# Remove
+    $bag_b -= $bag_d;					# Delete
 
     print "bag_b = $bag_b\n";
 
@@ -57,15 +57,15 @@ $VERSION = 1.002;
 
     print "-bag_b = ", -$bag_b"\n";			# Complement
 
-    $bag_c->remove(apples => 5);			# Would abort.
+    $bag_c->delete(apples => 5);			# Would abort.
     print "Can",					# Cannot ...
-          $bag_c->over_remove() ? "" : "not",
-          " over remove from bag_c\n";
-    $bag_c->over_remove(1);
+          $bag_c->over_delete() ? "" : "not",
+          " over delete from bag_c\n";
+    $bag_c->over_delete(1);
     print "Can",					# Can ...
-          $bag_c->over_remove() ? "" : "not",
-          " over remove from bag_c\n";
-    $bag_c->remove(apples => 5);			# Would succeed.
+          $bag_c->over_delete() ? "" : "not",
+          " over delete from bag_c\n";
+    $bag_c->delete(apples => 5);			# Would succeed.
     print $bag_c, "\n";					# ()
 
 =head1 DESCRIPTION
@@ -73,11 +73,11 @@ $VERSION = 1.002;
 This module implements a simple bag (multiset) class.
 
 A bag may contain one or more instances of elements.  One may add and
-remove one or more instances at a time.
+delete one or more instances at a time.
 
-If one attempts to remove more instances than there are to remove
-from, the default behavious of B<remove> is to abort.  The
-B<over_remove> can be used to control this behaviour.
+If one attempts to delete more instances than there are to delete
+from, the default behavious of B<delete> is to abort.  The
+B<over_delete> can be used to control this behaviour.
 
 Inserting or removing negative number of instances translates into
 removing or inserting positive number of instances, respectively.
@@ -95,7 +95,12 @@ The B<complement> will leave in the result bag the maximal number of
 instances ever seen (via B<new>, B<insert>, B<sum>, or B<maximize>)
 minus the number of instances in the complemented bag.
 
-Note the low precedence of C<|> and C<&> compared with C<eq> and C<ne>.
+=head1 NOTES
+
+The contents of a bag will be returned from the parameterless B<grab>
+in pseudorandom order.
+
+Beware the low precedence of C<|> and C<&> compared with C<eq> and C<ne>.
 
 =head1 AUTHOR
 
@@ -115,7 +120,7 @@ use overload
     q(eq)  => \&eq,
     q(ne)  => \&ne,
     q(+=)  => \&insert,
-    q(-=)  => \&remove,
+    q(-=)  => \&delete,
     q(+)   => \&sum,
     q(-)   => \&difference,
     q(|=)  => \&maximize,
@@ -160,8 +165,7 @@ sub ne {
 sub grab {
     my $bag = shift;
     if (@_) {
-      my @grab = @{$bag}{@_};
-      return map { defined $_ ? $_ : 0 } @grab;
+      return @{$bag}{@_};
     } else {
       return %{$bag};
     }
@@ -172,8 +176,7 @@ sub _merge {
     my $sub     = shift; # Element subroutine.
     my $ref_arg = shift; # Argument list.
     my $ref_bag = ref $bag;
-    while (@{$ref_arg}) {
-        my $e = shift @{$ref_arg};
+    while (my $e = shift @{$ref_arg}) {
         if (ref $e eq $ref_bag) {
             foreach my $c ($e->elements) {
                 $sub->($bag, $c, $e->{$c});
@@ -201,29 +204,29 @@ sub _insert {
         if $bag->{$e} > ($universe{$e} || 0);
 }
 
-my $over_remove = 'Set::Bag::__over_remove__';
+my $over_delete = 'Set::Bag::__over_delete__';
 
-sub over_remove {
+sub over_delete {
     my $bag = shift;
 
     if (@_ == 1) {
-	$bag->{$over_remove} = shift;
+	$bag->{$over_delete} = shift;
     } elsif (@_ == 0) {
-	return ($bag->{$over_remove} ||= 0);
+	return ($bag->{$over_delete} ||= 0);
     } else {
-	die "Set::Bag::over_remove: too many arguments (",
+	die "Set::Bag::over_delete: too many arguments (",
 	    $#_+1,
 	    "), want 0 or 1\n";
     }
 }
 
-sub _remove {
+sub _delete {
     my ($bag, $e, $n) = @_;
 
-    unless ($bag->over_remove) {
+    unless ($bag->over_delete) {
 	my $m = $bag->{$e} || 0;
 	$m >= $n or
-	    die "Set::Bag::remove: '$e' $m < $n\n";
+	    die "Set::Bag::delete: '$e' $m < $n\n";
     }
     $bag->{$e} -= int $n;
     delete $bag->{$e} if $bag->{$e} < 1;
@@ -237,18 +240,18 @@ sub insert {
 		       if ($n > 0) {
 			   $bag->_insert($e, $n);
 		       } elsif ($n < 0) {
-			   $bag->_remove($e, -$n);
+			   $bag->_delete($e, -$n);
 		       } },
 		 \@_);
     return $bag;
 }
 
-sub remove {
+sub delete {
     _underload(\@_);
     my $bag = shift;
     $bag->_merge(sub { my ($bag, $e, $n) = @_;
 		      if ($n > 0) {
-			  $bag->_remove($e, $n);
+			  $bag->_delete($e, $n);
 		      } elsif ($n < 0) {
 			  $bag->_insert($e, -$n);
 		      } },
@@ -295,7 +298,7 @@ sub sum {
 
 sub difference {
     my $difference = (shift)->copy;
-    $difference->remove(@_);
+    $difference->delete(@_);
     return $difference;
 }
 

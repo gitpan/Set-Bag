@@ -13,11 +13,14 @@ print "ok 1\n";
 print "not " unless $bag_a eq "(apples => 3, oranges => 4)";
 print "ok 2\n";
 
-print "not " unless join(":", $bag_a->grab) eq "apples:3:oranges:4";
+my %g3 = $bag_a->grab;
+print "not " unless keys %g3 == 2 and $g3{apples} == 3 and $g3{oranges} == 4;
 print "ok 3\n";
 
-print "not " unless join(":", $bag_a->grab('bananas','oranges','plums')) eq
-                    "0:4:0";
+my @g4 = $bag_a->grab('bananas','oranges','plums');
+print "not "
+    unless @g4 == 3 and
+           not defined $g4[0] and $g4[1] == 4 and not defined $g4[2];
 print "ok 4\n";
 
 my $bag_b = Set::Bag->new(mangos => 3);
@@ -30,23 +33,23 @@ $bag_b->insert(coconuts => 0);
 print "not " unless $bag_b eq "(apples => 1, mangos => 3)";
 print "ok 6\n";
 
-$bag_b->remove(mangos => 1);
+$bag_b->delete(mangos => 1);
 print "not " unless $bag_b eq "(apples => 1, mangos => 2)";
 print "ok 7\n";
 
-eval { $bag_b->remove(mangos => 10) };
+eval { $bag_b->delete(mangos => 10) };
 print "not "
     unless "$bag_b:$@" eq
-           "(apples => 1, mangos => 2):Set::Bag::remove: 'mangos' 2 < 10\n";
+           "(apples => 1, mangos => 2):Set::Bag::delete: 'mangos' 2 < 10\n";
 print "ok 8\n";
 
-eval { $bag_b->remove(cherries => 1) };
+eval { $bag_b->delete(cherries => 1) };
 print "not "
      unless "$bag_b:$@" eq
-            "(apples => 1, mangos => 2):Set::Bag::remove: 'cherries' 0 < 1\n";
+            "(apples => 1, mangos => 2):Set::Bag::delete: 'cherries' 0 < 1\n";
 print "ok 9\n";
 
-eval { $bag_b->remove(cherries => 0) };
+eval { $bag_b->delete(cherries => 0) };
 print "not " unless "$bag_b:$@" eq "(apples => 1, mangos => 2):";
 print "ok 10\n";
 
@@ -117,31 +120,31 @@ print "ok 24\n";
 print "not " unless -$bag_a eq "(apples => 1, mangos => 3)";
 print "ok 25\n";
 
-my $over_remove;
-eval { $over_remove = $bag_d->over_remove };
-print "not " unless $over_remove == 0;
+my $over_delete;
+eval { $over_delete = $bag_d->over_delete };
+print "not " unless $over_delete == 0;
 print "ok 26\n";
 
-eval { $bag_d->over_remove(4,5,6) };
+eval { $bag_d->over_delete(4,5,6) };
 print "not " unless $@ eq
-                    "Set::Bag::over_remove: too many arguments (3), want 0 or 1\n";
+                    "Set::Bag::over_delete: too many arguments (3), want 0 or 1\n";
 print "ok 27\n";
 
-$over_remove = $bag_d->over_remove(1);
-print "not " unless $over_remove == 1;
+$over_delete = $bag_d->over_delete(1);
+print "not " unless $over_delete == 1;
 print "ok 28\n";
 
-eval { $bag_d->remove(mangos => 5) };
+eval { $bag_d->delete(mangos => 5) };
 print "not " unless "$bag_d:$@" eq
                     "(apples => 3, oranges => 4):";
 print "ok 29\n";
 
-eval { $bag_d->remove(cherries => 1) };
+eval { $bag_d->delete(cherries => 1) };
 print "not " unless "$bag_d:$@" eq
                     "(apples => 3, oranges => 4):";
 print "ok 30\n";
 
-$bag_d->over_remove(0);
+$bag_d->over_delete(0);
 
 eval { $bag_d->insert(apples => -1) };
 print "not "
@@ -149,7 +152,7 @@ print "not "
            "(apples => 2, oranges => 4):";
 print "ok 31\n";
 
-eval { $bag_d->remove(apples => -1) };
+eval { $bag_d->delete(apples => -1) };
 print "not "
     unless "$bag_d:$@" eq
            "(apples => 3, oranges => 4):";
