@@ -1,5 +1,11 @@
+2005-01-09  Jarkko Hietaniemi  <jhi@iki.fi>
+
+	* Test::More-ify t/bag.t (from Bruce W. Lowther)
+
+	* Release 1.009.
+	
 Wed Nov 20 01:44:40 2002  Jarkko Hietaniemi  <jhi@iki.fi>
 
-	* 1.008: elements() could retuns the magic "over delete" key.
+	* 1.008: elements() could return the magic "over delete" key.
 
 

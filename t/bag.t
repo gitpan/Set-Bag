@@ -1,182 +1,208 @@
-use Set::Bag;
+use Test::More tests => 47;
+
+BEGIN { use_ok( 'Set::Bag'); }
 
 use strict;
-
-print "1..36\n";
 
 my $bag_n = Set::Bag->new;
 my $bag_a = Set::Bag->new(apples => 3, oranges => 4);
 
-print "not " unless $bag_n eq "()";
-print "ok 1\n";
+is($bag_n, '()', 'null bag');
+is($bag_a, '(apples => 3, oranges => 4)', 'bag with apples and oranges');
 
-print "not " unless $bag_a eq "(apples => 3, oranges => 4)";
-print "ok 2\n";
+{
+  my %g3 = $bag_a->grab;
+  ok((keys(%g3) == 2) && ($g3{apples} == 3) && ($g3{oranges} == 4),
+     'grab with no parameters yields a hash');
+}
 
-my %g3 = $bag_a->grab;
-print "not " unless keys %g3 == 2 and $g3{apples} == 3 and $g3{oranges} == 4;
-print "ok 3\n";
-
-my @g4 = $bag_a->grab('bananas','oranges','plums');
-print "not "
-    unless @g4 == 3 and
-           not defined $g4[0] and $g4[1] == 4 and not defined $g4[2];
-print "ok 4\n";
+{
+  my @g4 = $bag_a->grab('bananas','oranges','plums');
+  ok(eq_array(\@g4, [undef, 4, undef]), 
+     'grab with parameters yields the selected bag count');
+}
 
 my $bag_b = Set::Bag->new(mangos => 3);
 
 $bag_b->insert(apples => 1);
-print "not " unless $bag_b eq "(apples => 1, mangos => 3)";
-print "ok 5\n";
+ok(($bag_b->grab('apples') == 1) &&
+   ($bag_b->grab('mangos') == 3), 'insert test with existing element');
 
 $bag_b->insert(coconuts => 0);
-print "not " unless $bag_b eq "(apples => 1, mangos => 3)";
-print "ok 6\n";
+ok(($bag_b->grab('apples') == 1) &&
+   ($bag_b->grab('mangos') == 3), 'insert test with empty item');
 
 $bag_b->delete(mangos => 1);
-print "not " unless $bag_b eq "(apples => 1, mangos => 2)";
-print "ok 7\n";
+ok(($bag_b->grab('apples') == 1) &&
+   ($bag_b->grab('mangos') == 2), 'delete test with existing element');
 
 eval { $bag_b->delete(mangos => 10) };
-print "not "
-    unless "$bag_b:$@" eq
-           "(apples => 1, mangos => 2):Set::Bag::delete: 'mangos' 2 < 10\n";
-print "ok 8\n";
+ok($@, 'exception expected');
+is($@, qq{Set::Bag::delete: 'mangos' 2 < 10\n}, 
+   'delete more than existing test.');
+ok(($bag_b->grab('apples') == 1) &&
+   ($bag_b->grab('mangos') == 2), 'bag should not have changed' );
 
 eval { $bag_b->delete(cherries => 1) };
-print "not "
-     unless "$bag_b:$@" eq
-            "(apples => 1, mangos => 2):Set::Bag::delete: 'cherries' 0 < 1\n";
-print "ok 9\n";
+ok($@, 'exception expected');
+is($@, qq{Set::Bag::delete: 'cherries' 0 < 1\n}, 
+   'delete non-existant item');
+ok(($bag_b->grab('apples') == 1) &&
+   ($bag_b->grab('mangos') == 2), 'bag should not have changed.');
 
 eval { $bag_b->delete(cherries => 0) };
-print "not " unless "$bag_b:$@" eq "(apples => 1, mangos => 2):";
-print "ok 10\n";
+ok((not $@), 'delete non-existing item from bag is fine');
+ok(($bag_b->grab('apples') == 1) &&
+   ($bag_b->grab('mangos') == 2), 'bag should not have changed.');
 
-my $bag_c = $bag_a->sum($bag_b);
-print "not " unless $bag_c eq "(apples => 4, mangos => 2, oranges => 4)";
-print "ok 11\n";
+{
+  my $r = $bag_a->sum($bag_b);
+  ok(($r->grab('apples') == 4) &&
+     ($r->grab('mangos') == 2) &&
+     ($r->grab('oranges') == 4), 'sum test');
+}
 
 my $bag_d = $bag_a->union($bag_b);
-print "not " unless $bag_d eq "(apples => 3, mangos => 2, oranges => 4)";
-print "ok 12\n";
+ok(($bag_d->grab('apples') == 3) &&
+   ($bag_d->grab('mangos') == 2) &&
+   ($bag_d->grab('oranges') == 4), 'union test');
 
-my $bag_e = $bag_a->intersection($bag_b);
-print "not " unless $bag_e eq "(apples => 1)";
-print "ok 13\n";
+{
+  my $r = $bag_a->intersection($bag_b);
+  ok($r->grab('apples') == 1, 'intersection test');
+}
 
-my $bag_f = $bag_a->complement;
-print "not " unless $bag_f eq "(apples => 1, mangos => 3)";
-print "ok 14\n";
+{
+  my $r = $bag_a->complement;
+  ok(($r->grab('apples') == 1) &&
+     ($r->grab('mangos') == 3), 'complement test');
+}
 
-print "not " unless $bag_f ne "(apples => 2, mangos => 1)";
-print "ok 15\n";
+{
+  my $r = $bag_b->copy;
+  $r->insert(oranges => 1);
+  ok(($r->grab('apples') == 1) &&
+     ($r->grab('mangos') == 2), 'copy test');
+}
 
-$bag_c = $bag_b->copy;
-$bag_c->insert(oranges => 1);
-print "not " unless $bag_b eq "(apples => 1, mangos => 2)";
-print "ok 16\n";
+{
+  my $r = $bag_a + $bag_b;
+  ok(($r->grab('apples') == 4) &&
+     ($r->grab('mangos') == 2) &&
+     ($r->grab('oranges') == 4), 'sum binary operator');
+}
 
-print "not "
-    unless $bag_a + $bag_b eq
-           "(apples => 4, mangos => 2, oranges => 4)";
-print "ok 17\n";
-
-print "not "
-    unless (($bag_c = $bag_a->copy) += $bag_b) eq
-	   "(apples => 4, mangos => 2, oranges => 4)";
-print "ok 18\n";
+{
+  my $r = $bag_a->copy;
+  $r += $bag_b;
+  ok(($r->grab('apples') == 4) &&
+     ($r->grab('mangos') == 2) &&
+     ($r->grab('oranges') == 4), 'sum with assignment')
+}
 
 my $bag_g = Set::Bag->new(apples => 1, oranges => 1);
+{
+  my $r = $bag_a - $bag_g;
+  ok(($r->grab('apples') == 2) &&
+     ($r->grab('oranges') == 3), 'difference unary operator');
+}
 
-print "not "
-    unless $bag_a - $bag_g eq
-           "(apples => 2, oranges => 3)";
-print "ok 19\n";
+{
+  my $r = $bag_a->copy;
+  $r -= $bag_g;
+  ok(($r->grab('apples') == 2) &&
+     ($r->grab('oranges') == 3), 'difference with assignment');
+}
 
-print "not "
-    unless (($bag_c = $bag_a->copy) -= $bag_g) eq
-           "(apples => 2, oranges => 3)";
-print "ok 20\n";
+{
+  my $r = $bag_a | $bag_b;
+  ok(($r->grab('apples') == 3) &&
+     ($r->grab('mangos') == 2) &&
+     ($r->grab('oranges') == 4), 'union unary operator');
+}
 
-print "not "
-	unless ($bag_a | $bag_b) eq
-               "(apples => 3, mangos => 2, oranges => 4)";
-print "ok 21\n";
+{
+  my $r = $bag_a->copy;
+  $r |= $bag_b;
+  ok(($r->grab('apples') == 3) &&
+     ($r->grab('mangos') == 2) &&
+     ($r->grab('oranges') == 4), 'union with assignment');
+}
 
-print "not " unless (($bag_c = $bag_a->copy) |= $bag_b) eq
-	"(apples => 3, mangos => 2, oranges => 4)";
-print "ok 22\n";
+{
+  my $r = $bag_a & $bag_b;
+  ok($r->grab('apples') == 1, 'intersection unary operator');
+}
 
-print "not "
-	unless ($bag_a & $bag_b) eq
-               "(apples => 1)";
-print "ok 23\n";
+{ 
+  my $r = $bag_a->copy;
+  $r &= $bag_b;
+  ok($r->grab('apples') == 1, 'intersection with assignment');
+}
 
-print "not " unless (($bag_c = $bag_a->copy) &= $bag_b) eq
-	"(apples => 1)";
-print "ok 24\n";
+{
+  my $r = -$bag_a;
+  ok(($r->grab('apples') == 1) &&
+     ($r->grab('mangos') == 3), 'comlement binary operator');
+}
 
-print "not " unless -$bag_a eq "(apples => 1, mangos => 3)";
-print "ok 25\n";
-
-my $over_delete;
-eval { $over_delete = $bag_d->over_delete };
-print "not " unless $over_delete == 0;
-print "ok 26\n";
+{
+  my $over_delete;
+  eval { $over_delete = $bag_d->over_delete };
+  ok(not $@);
+  ok($over_delete == 0, q{checking the 'over_delete' attribute});
+}
 
 eval { $bag_d->over_delete(4,5,6) };
-print "not " unless $@ eq
-                    "Set::Bag::over_delete: too many arguments (3), want 0 or 1\n";
-print "ok 27\n";
+ok($@,'exception expected');
+is($@, "Set::Bag::over_delete: too many arguments (3), want 0 or 1\n", 'exception text ok');
 
-$over_delete = $bag_d->over_delete(1);
-print "not " unless $over_delete == 1;
-print "ok 28\n";
+ok($bag_d->over_delete(1) == 1, q{setting the 'over_delete' attribute});
 
 eval { $bag_d->delete(mangos => 5) };
-print "not " unless "$bag_d:$@" eq
-                    "(apples => 3, oranges => 4):";
-print "ok 29\n";
+ok((not $@), 'ignore delete of non-existant bag element');
+ok(($bag_d->grab('apples') == 3) &&
+   ($bag_d->grab('oranges') == 4), 'no change to bag');
 
 eval { $bag_d->delete(cherries => 1) };
-print "not " unless "$bag_d:$@" eq
-                    "(apples => 3, oranges => 4):";
-print "ok 30\n";
+ok((not $@), 'ignore delete of existant bag element (because of over_delete attribute)');
+ok(($bag_d->grab('apples') == 3) &&
+   ($bag_d->grab('oranges') == 4), 'no change to bag');
 
 $bag_d->over_delete(0);
 
 eval { $bag_d->insert(apples => -1) };
-print "not "
-    unless "$bag_d:$@" eq
-           "(apples => 2, oranges => 4):";
-print "ok 31\n";
+ok((not $@), 'insert negative is not an error');
+ok(($bag_d->grab('apples') == 2) &&
+   ($bag_d->grab('oranges') == 4), 'insert negative on bag is ok');
 
 eval { $bag_d->delete(apples => -1) };
-print "not "
-    unless "$bag_d:$@" eq
-           "(apples => 3, oranges => 4):";
-print "ok 32\n";
+ok((not $@), 'delete negative is not an error');
+ok(($bag_d->grab('apples') == 3) &&
+   ($bag_d->grab('oranges') == 4), 'delete negative on bag is ok');
 
 $bag_a->over_delete(1);
 
-$bag_c = $bag_a->difference($bag_b);
-print "not " unless $bag_c eq "(apples => 2, oranges => 4)";
-print "ok 33\n";
+my $bag_c = $bag_a->difference($bag_b);
+ok(($bag_c->grab('apples') == 2) &&
+   ($bag_c->grab('oranges') == 4), 'difference test');
 
-$bag_c = $bag_a - $bag_b;
-print "not " unless $bag_c eq "(apples => 2, oranges => 4)";
-print "ok 34\n";
+{
+  my $r = $bag_a - $bag_b;
+  ok(($r->grab('apples') == 2) &&
+     ($r->grab('oranges') == 4), 'difference unary operator');
+}
 
-my @e;
+{
+  my $r = Set::Bag->new(banana=>7, coconut=>4, grapes=>9);
+  my @e = $r->elements;
+  ok(eq_array(\@e, ['banana', 'coconut', 'grapes']), 'elements test');
+}
 
-@e = $bag_c->elements;
-print "not " unless @e == 2 && $e[0] eq 'apples' && $e[1] eq 'oranges';
-print "ok 35\n";
-
-my $bag_d = Set::Bag->new(kiwis => 4);
-@e = $bag_d->elements;
-print "not " unless @e == 1 && $e[0] eq 'kiwis';
-print "ok 36\n";
+{
+  my $r = Set::Bag->new(kiwis => 4);
+  my @e = $r->elements;
+  ok(eq_array(\@e, ['kiwis']), 'elements test');
+}
 
 # eof
