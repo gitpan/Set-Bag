@@ -2,7 +2,7 @@ package Set::Bag;
 
 # $Id: Bag.pm,v 1.7 1998/10/04 18:45:06 jhi Exp jhi $
 
-$VERSION = 1.001;
+$VERSION = 1.002;
 
 =pod
 
@@ -78,6 +78,9 @@ remove one or more instances at a time.
 If one attempts to remove more instances than there are to remove
 from, the default behavious of B<remove> is to abort.  The
 B<over_remove> can be used to control this behaviour.
+
+Inserting or removing negative number of instances translates into
+removing or inserting positive number of instances, respectively.
 
 The B<sum> is something called the I<additive union>.  It leaves in
 the result bag the sum of all the instances of all bags.
@@ -164,7 +167,7 @@ sub grab {
     }
 }
 
-sub merge {
+sub _merge {
     my $bag     = shift;
     my $sub     = shift; # Element subroutine.
     my $ref_arg = shift; # Argument list.
@@ -191,17 +194,11 @@ sub _underload { # Undo overload effects on @_.
 
 my %universe;
 
-sub insert {
-    _underload(\@_);
-    my $bag = shift;
-    $bag->merge(sub { my ($bag, $e, $n) = @_;
-		      if ($n) {
-			  die "Set::Bag::insert: $e $n negative\n" if $n < 0;
-			  $bag->{$e} += $n;
-			  $universe{$e} = $bag->{$e}
-		              if $bag->{$e} > ($universe{$e} || 0) } },
-		\@_);
-    return $bag;
+sub _insert {
+    my ($bag, $e, $n) = @_;
+    $bag->{$e} += int $n;
+    $universe{$e} = $bag->{$e}
+        if $bag->{$e} > ($universe{$e} || 0);
 }
 
 my $over_remove = 'Set::Bag::__over_remove__';
@@ -220,18 +217,41 @@ sub over_remove {
     }
 }
 
+sub _remove {
+    my ($bag, $e, $n) = @_;
+
+    unless ($bag->over_remove) {
+	my $m = $bag->{$e} || 0;
+	$m >= $n or
+	    die "Set::Bag::remove: '$e' $m < $n\n";
+    }
+    $bag->{$e} -= int $n;
+    delete $bag->{$e} if $bag->{$e} < 1;
+}
+
+
+sub insert {
+    _underload(\@_);
+    my $bag = shift;
+    $bag->_merge(sub { my ($bag, $e, $n) = @_;
+		       if ($n > 0) {
+			   $bag->_insert($e, $n);
+		       } elsif ($n < 0) {
+			   $bag->_remove($e, -$n);
+		       } },
+		 \@_);
+    return $bag;
+}
+
 sub remove {
     _underload(\@_);
     my $bag = shift;
-    $bag->merge(sub { my ($bag, $e, $n) = @_;
-		      if ($n) {
-			  die "Set::Bag::remove: $e $n negative\n" if $n < 0;
-			  unless ($bag->over_remove) {
-			      my $m = $bag->{$e} || 0;
-			      $m >= $n or die "Set::Bag::remove: $e $m < $n\n";
-			  }
-			  $bag->{$e} -= $n;
-			  delete $bag->{$e} if $bag->{$e} < 1 } },
+    $bag->_merge(sub { my ($bag, $e, $n) = @_;
+		      if ($n > 0) {
+			  $bag->_remove($e, $n);
+		      } elsif ($n < 0) {
+			  $bag->_insert($e, -$n);
+		      } },
 		\@_);
     return $bag;
 }
@@ -239,7 +259,7 @@ sub remove {
 sub maximize {
     _underload(\@_);
     my $max = shift;
-    $max->merge(sub { my ($bag, $e, $n) = @_;
+    $max->_merge(sub { my ($bag, $e, $n) = @_;
 		      $bag->{$e} = $n
 			  if not defined $bag->{$e} or $n > $bag->{$e};
 		      $universe{$e} = $n
@@ -253,7 +273,7 @@ sub minimize {
     my $min = shift;
     my %min;
     foreach my $e ($min->elements) { $min{$e} = 1 }
-    $min->merge(sub { my ($bag, $e, $n) = @_;
+    $min->_merge(sub { my ($bag, $e, $n) = @_;
 		      $min{$e}++;
 		      $bag->{$e} = $n
 			  if defined $bag->{$e} and $n < $bag->{$e} },

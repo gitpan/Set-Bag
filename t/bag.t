@@ -37,13 +37,13 @@ print "ok 7\n";
 eval { $bag_b->remove(mangos => 10) };
 print "not "
     unless "$bag_b:$@" eq
-           "(apples => 1, mangos => 2):Set::Bag::remove: mangos 2 < 10\n";
+           "(apples => 1, mangos => 2):Set::Bag::remove: 'mangos' 2 < 10\n";
 print "ok 8\n";
 
 eval { $bag_b->remove(cherries => 1) };
 print "not "
      unless "$bag_b:$@" eq
-            "(apples => 1, mangos => 2):Set::Bag::remove: cherries 0 < 1\n";
+            "(apples => 1, mangos => 2):Set::Bag::remove: 'cherries' 0 < 1\n";
 print "ok 9\n";
 
 eval { $bag_b->remove(cherries => 0) };
@@ -143,16 +143,16 @@ print "ok 30\n";
 
 $bag_d->over_remove(0);
 
-eval { $bag_e->insert(cherries => -1) };
+eval { $bag_d->insert(apples => -1) };
 print "not "
-    unless "$bag_e:$@" eq
-           "(apples => 1):Set::Bag::insert: cherries -1 negative\n";
+    unless "$bag_d:$@" eq
+           "(apples => 2, oranges => 4):";
 print "ok 31\n";
 
-eval { $bag_e->remove(cherries => -1) };
+eval { $bag_d->remove(apples => -1) };
 print "not "
-    unless "$bag_e:$@" eq
-           "(apples => 1):Set::Bag::remove: cherries -1 negative\n";
+    unless "$bag_d:$@" eq
+           "(apples => 3, oranges => 4):";
 print "ok 32\n";
 
 # eof
