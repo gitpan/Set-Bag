@@ -1,8 +1,6 @@
 package Set::Bag;
 
-# $Id: Bag.pm,v 1.4 1999/01/29 11:33:47 jhi Exp $
-
-$VERSION = 1.007;
+$VERSION = 1.008;
 
 =pod
 
@@ -141,6 +139,8 @@ use overload
     q(=)   => \&copy,
     ;
 
+my $over_delete = 'Set::Bag::__over_delete__';
+
 sub new {
     my $type = shift;
     my $bag = { };
@@ -151,7 +151,7 @@ sub new {
 
 sub elements {
     my $bag = shift;
-    return sort keys %{$bag};
+    return sort grep { $_ ne $over_delete } keys %{$bag};
 }
 
 sub bag {
@@ -213,8 +213,6 @@ sub _insert {
     $universe{$e} = $bag->{$e}
         if $bag->{$e} > ($universe{$e} || 0);
 }
-
-my $over_delete = 'Set::Bag::__over_delete__';
 
 sub over_delete {
     my $bag = shift;

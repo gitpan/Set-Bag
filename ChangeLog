@@ -1,0 +1,5 @@
+Wed Nov 20 01:44:40 2002  Jarkko Hietaniemi  <jhi@iki.fi>
+
+	* 1.008: elements() could retuns the magic "over delete" key.
+
+

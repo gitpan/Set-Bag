@@ -2,7 +2,7 @@ use Set::Bag;
 
 use strict;
 
-print "1..34\n";
+print "1..36\n";
 
 my $bag_n = Set::Bag->new;
 my $bag_a = Set::Bag->new(apples => 3, oranges => 4);
@@ -167,5 +167,16 @@ print "ok 33\n";
 $bag_c = $bag_a - $bag_b;
 print "not " unless $bag_c eq "(apples => 2, oranges => 4)";
 print "ok 34\n";
+
+my @e;
+
+@e = $bag_c->elements;
+print "not " unless @e == 2 && $e[0] eq 'apples' && $e[1] eq 'oranges';
+print "ok 35\n";
+
+my $bag_d = Set::Bag->new(kiwis => 4);
+@e = $bag_d->elements;
+print "not " unless @e == 1 && $e[0] eq 'kiwis';
+print "ok 36\n";
 
 # eof
