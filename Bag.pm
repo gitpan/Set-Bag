@@ -1,8 +1,8 @@
 package Set::Bag;
 
-# $Id: Bag.pm,v 1.9 1998/10/06 09:33:13 jhi Exp $
+# $Id: Bag.pm,v 1.9 1998/10/06 09:33:13 jhi Exp jhi $
 
-$VERSION = 1.005;
+$VERSION = 1.006;
 
 =pod
 
@@ -31,6 +31,8 @@ $VERSION = 1.005;
     my @b_grab_app = $bag_b->grab('apples', 'cherries'); # (3, 1)
 
     print "bag_a     sum      bag_b = ", $bag_b->sum($bag_b),          "\n";
+    print "bag_a  difference  bag_b = ", $bag_b->difference($bag_b),   "\n";
+
     print "bag_a    union     bag_b = ", $bag_a->union($bag_b),        "\n";
     print "bag_a intersection bag_b = ", $bag_a->intersection($bag_b), "\n";
 
@@ -46,6 +48,8 @@ $VERSION = 1.005;
     print "bag_b = $bag_b\n";
 
     print "bag_a + bag_b = ", $bag_b + $bag_b, "\n";	# Sum
+    print "bag_a - bag_b = ", $bag_b + $bag_b, "\n";	# Difference
+
     print "bag_a | bag_b = ", $bag_a | $bag_b, "\n";	# Union
     print "bag_a & bag_b = ", $bag_a & $bag_b, "\n";	# Intersection
 
@@ -84,6 +88,8 @@ removing or inserting positive number of instances, respectively.
 
 The B<sum> is something called the I<additive union>.  It leaves in
 the result bag the sum of all the instances of all bags.
+
+Before the B<difference> you most probably will need the B<over_delete>.
 
 The B<union> is something called the I<maximal union>.  It leaves in
 the result bag the maximal number of instances in all bags.

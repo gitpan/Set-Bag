@@ -2,7 +2,7 @@ use Set::Bag;
 
 use strict;
 
-print "1..32\n";
+print "1..34\n";
 
 my $bag_n = Set::Bag->new;
 my $bag_a = Set::Bag->new(apples => 3, oranges => 4);
@@ -157,5 +157,15 @@ print "not "
     unless "$bag_d:$@" eq
            "(apples => 3, oranges => 4):";
 print "ok 32\n";
+
+$bag_a->over_delete(1);
+
+$bag_c = $bag_a->difference($bag_b);
+print "not " unless $bag_c eq "(apples => 2, oranges => 4)";
+print "ok 33\n";
+
+$bag_c = $bag_a - $bag_b;
+print "not " unless $bag_c eq "(apples => 2, oranges => 4)";
+print "ok 34\n";
 
 # eof
