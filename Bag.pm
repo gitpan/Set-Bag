@@ -1,8 +1,8 @@
 package Set::Bag;
 
-# $Id: Bag.pm,v 1.8 1998/10/05 19:09:53 jhi Exp jhi $
+# $Id: Bag.pm,v 1.9 1998/10/06 09:33:13 jhi Exp $
 
-$VERSION = 1.004;
+$VERSION = 1.005;
 
 =pod
 

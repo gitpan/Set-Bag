@@ -1,8 +1,9 @@
 reorder t/bag.t more logically
-allow fractional 'number of instances'?
-allow negative 'number of instances'?
-publicize _merge?
+compare? (equal, disjoint, et cetera)
 symmetric difference?
+allow negative 'number of instances'?
+allow fractional 'number of instances'?
+publicize _merge?
 
 
 
