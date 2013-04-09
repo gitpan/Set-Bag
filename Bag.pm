@@ -1,6 +1,6 @@
 package Set::Bag;
 
-$VERSION = 1.009;
+$VERSION = 1.010;
 
 =pod
 
@@ -24,9 +24,9 @@ $VERSION = 1.009;
 
     $bag_b->insert(cherries => 1, $bag_c);
 
-    my @b_elements = $bag_b->elements;	# ('apples','cherries','mangos')
+    my @b_elements = $bag_b->elements;  # ('apples','cherries','mangos')
     my @b_grab_app = $bag_b->grab('apples', 'cherries'); # (3, 1)
-    my @a_grab_all = $bag_a->grab;	# (apples => 3, oranges => 4)
+    my @a_grab_all = $bag_a->grab;  # (apples => 3, oranges => 4)
 
     print "bag_a     sum      bag_b = ", $bag_b->sum($bag_b),          "\n";
     print "bag_a  difference  bag_b = ", $bag_b->difference($bag_b),   "\n";
@@ -38,37 +38,37 @@ $VERSION = 1.009;
 
     # Operator Overloads
 
-    print "bag_a = $bag_a\n";		# (apples => 3, oranges => 4)
+    print "bag_a = $bag_a\n";   # (apples => 3, oranges => 4)
 
-    $bag_b += $bag_c;					# Insert
-    $bag_b -= $bag_d;					# Delete
+    $bag_b += $bag_c;         # Insert
+    $bag_b -= $bag_d;         # Delete
 
     print "bag_b = $bag_b\n";
 
-    print "bag_a + bag_b = ", $bag_b + $bag_b, "\n";	# Sum
-    print "bag_a - bag_b = ", $bag_b - $bag_b, "\n";	# Difference
+    print "bag_a + bag_b = ", $bag_b + $bag_b, "\n";  # Sum
+    print "bag_a - bag_b = ", $bag_b - $bag_b, "\n";  # Difference
 
-    print "bag_a | bag_b = ", $bag_a | $bag_b, "\n";	# Union
-    print "bag_a & bag_b = ", $bag_a & $bag_b, "\n";	# Intersection
+    print "bag_a | bag_b = ", $bag_a | $bag_b, "\n";  # Union
+    print "bag_a & bag_b = ", $bag_a & $bag_b, "\n";  # Intersection
 
-    $bag_b |= $bag_c;					# Maximize
-    $bag_b &= $bag_d;					# Minimize
+    $bag_b |= $bag_c;         # Maximize
+    $bag_b &= $bag_d;         # Minimize
 
-    print "good\n" if     $bag_a eq "(apples => 3, oranges => 4)";	# Eq
-    print "bad\n"  unless $bag_a ne "(apples => 3, oranges => 4)";	# Ne
+    print "good\n" if     $bag_a eq "(apples => 3, oranges => 4)";  # Eq
+    print "bad\n"  unless $bag_a ne "(apples => 3, oranges => 4)";  # Ne
 
-    print "-bag_b = ", -$bag_b"\n";			# Complement
+    print "-bag_b = ", -$bag_b"\n";     # Complement
 
-    $bag_c->delete(apples => 5);			# Would abort.
-    print "Can",					# Cannot ...
+    $bag_c->delete(apples => 5);      # Would abort.
+    print "Can",          # Cannot ...
           $bag_c->over_delete() ? "" : "not",
           " over delete from bag_c\n";
     $bag_c->over_delete(1);
-    print "Can",					# Can ...
+    print "Can",          # Can ...
           $bag_c->over_delete() ? "" : "not",
           " over delete from bag_c\n";
-    $bag_c->delete(apples => 5);			# Would succeed.
-    print $bag_c, "\n";					# ()
+    $bag_c->delete(apples => 5);      # Would succeed.
+    print $bag_c, "\n";         # ()
 
 =head1 DESCRIPTION
 
@@ -112,7 +112,10 @@ Beware the low precedence of C<|> and C<&> compared with C<eq> and C<ne>.
 
 =head1 AUTHOR
 
-Jarkko Hietaniemi <jhi@iki.fi>
+David Oswald C<< <davido@cpan.org> >> is the current maintainer, starting with
+release 1.010.
+
+Jarkko Hietaniemi C<< <jhi@iki.fi> >> was the original author.
 
 =head1 COPYRIGHT
 
@@ -157,11 +160,11 @@ sub elements {
 sub bag {
     my $bag = shift;
     return
-	"(" .
-	(join ", ",
+  "(" .
+  (join ", ",
              map { "$_ => $bag->{$_}" }
                  sort grep { ! /^Set::Bag::/ } $bag->elements) .
-	")";
+  ")";
 }
 
 sub eq {
@@ -202,7 +205,7 @@ sub _underload { # Undo overload effects on @_.
     # residue of the operator overload system, drop it.
     pop @{$_[0]}
         if (not defined $_[0]->[-1] and not ref $_[0]->[-1]) or
-	   $_[0]->[-1] eq '';
+     $_[0]->[-1] eq '';
 }
 
 my %universe;
@@ -218,13 +221,13 @@ sub over_delete {
     my $bag = shift;
 
     if (@_ == 1) {
-	$bag->{$over_delete} = shift;
+  $bag->{$over_delete} = shift;
     } elsif (@_ == 0) {
-	return ($bag->{$over_delete} ||= 0);
+  return ($bag->{$over_delete} ||= 0);
     } else {
-	die "Set::Bag::over_delete: too many arguments (",
-	    $#_+1,
-	    "), want 0 or 1\n";
+  die "Set::Bag::over_delete: too many arguments (",
+      $#_+1,
+      "), want 0 or 1\n";
     }
 }
 
@@ -232,9 +235,9 @@ sub _delete {
     my ($bag, $e, $n) = @_;
 
     unless ($bag->over_delete) {
-	my $m = $bag->{$e} || 0;
-	$m >= $n or
-	    die "Set::Bag::delete: '$e' $m < $n\n";
+  my $m = $bag->{$e} || 0;
+  $m >= $n or
+      die "Set::Bag::delete: '$e' $m < $n\n";
     }
     $bag->{$e} -= int $n;
     delete $bag->{$e} if $bag->{$e} < 1;
@@ -245,12 +248,12 @@ sub insert {
     _underload(\@_);
     my $bag = shift;
     $bag->_merge(sub { my ($bag, $e, $n) = @_;
-		       if ($n > 0) {
-			   $bag->_insert($e, $n);
-		       } elsif ($n < 0) {
-			   $bag->_delete($e, -$n);
-		       } },
-		 \@_);
+           if ($n > 0) {
+         $bag->_insert($e, $n);
+           } elsif ($n < 0) {
+         $bag->_delete($e, -$n);
+           } },
+     \@_);
     return $bag;
 }
 
@@ -258,12 +261,12 @@ sub delete {
     _underload(\@_);
     my $bag = shift;
     $bag->_merge(sub { my ($bag, $e, $n) = @_;
-		      if ($n > 0) {
-			  $bag->_delete($e, $n);
-		      } elsif ($n < 0) {
-			  $bag->_insert($e, -$n);
-		      } },
-		\@_);
+          if ($n > 0) {
+        $bag->_delete($e, $n);
+          } elsif ($n < 0) {
+        $bag->_insert($e, -$n);
+          } },
+    \@_);
     return $bag;
 }
 
@@ -271,11 +274,11 @@ sub maximize {
     _underload(\@_);
     my $max = shift;
     $max->_merge(sub { my ($bag, $e, $n) = @_;
-		      $bag->{$e} = $n
-			  if not defined $bag->{$e} or $n > $bag->{$e};
-		      $universe{$e} = $n
-		              if $n > ($universe{$e} || 0) },
-		\@_);
+          $bag->{$e} = $n
+        if not defined $bag->{$e} or $n > $bag->{$e};
+          $universe{$e} = $n
+                  if $n > ($universe{$e} || 0) },
+    \@_);
     return $max;
 }
 
@@ -285,10 +288,10 @@ sub minimize {
     my %min;
     foreach my $e ($min->elements) { $min{$e} = 1 }
     $min->_merge(sub { my ($bag, $e, $n) = @_;
-		      $min{$e}++;
-		      $bag->{$e} = $n
-			  if defined $bag->{$e} and $n < $bag->{$e} },
-		\@_);
+          $min{$e}++;
+          $bag->{$e} = $n
+        if defined $bag->{$e} and $n < $bag->{$e} },
+    \@_);
     foreach my $e (keys %min) { delete $min->{$e} if $min{$e} == 1 }
     return $min;
 }
@@ -326,8 +329,8 @@ sub complement {
     my $bag = shift;
     my $complement  = (ref $bag)->new;
     foreach my $e (keys %universe) {
-	$complement->{$e} = $universe{$e} - ($bag->{$e} || 0);
-	delete $complement->{$e} unless $complement->{$e};
+  $complement->{$e} = $universe{$e} - ($bag->{$e} || 0);
+  delete $complement->{$e} unless $complement->{$e};
     }
     return $complement;
 }
