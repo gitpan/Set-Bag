@@ -13,6 +13,8 @@ you should be able to read the documentation also with
 
 	perldoc Set::Bag
 
--- 
-Jarkko Hietaniemi <jhi@iki.fi>
+--
+
+David Oswald <davido@cpan.org> (Maintainer)
+Jarkko Hietaniemi <jhi@iki.fi> (Original author)
 

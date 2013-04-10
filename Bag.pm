@@ -1,6 +1,6 @@
 package Set::Bag;
 
-$VERSION = 1.011;
+$VERSION = 1.012;
 
 =pod
 
@@ -121,10 +121,15 @@ release 1.010.
 
 Jarkko Hietaniemi C<< <jhi@iki.fi> >> was the original author.
 
-=head1 COPYRIGHT
+=head1 LICENSE AND COPYRIGHT
 
-O'Reilly and Associates.  This module can be distributed under the
-same terms as Perl itself.
+Copyright O'Reilly and Associates.
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of either: the GNU General Public License as published by the Free
+Software Foundation; or the Artistic License.
+
+See L<perlgpl> and L<perlartistic> for full details.
 
 =cut
 

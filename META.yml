@@ -20,4 +20,4 @@ no_index:
 requires:
   perl: 5.004000
 resources: {}
-version: 1.011
+version: 1.012
