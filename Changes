@@ -1,5 +1,9 @@
 Revision history for Perl module Set::Bag
 
+1.011 2013-04-09
+  - First pass on modernizing Makefile.PL
+  - Typos corrected in SYNOPSIS section of POD.
+
 1.010 2013-04-08
   - Maintenance release by David Oswald.
   - Restored Set::Bag to CPAN (It had been deleted).

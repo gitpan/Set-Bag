@@ -1,6 +1,6 @@
 package Set::Bag;
 
-$VERSION = 1.010;
+$VERSION = 1.011;
 
 =pod
 
@@ -28,8 +28,8 @@ $VERSION = 1.010;
     my @b_grab_app = $bag_b->grab('apples', 'cherries'); # (3, 1)
     my @a_grab_all = $bag_a->grab;  # (apples => 3, oranges => 4)
 
-    print "bag_a     sum      bag_b = ", $bag_b->sum($bag_b),          "\n";
-    print "bag_a  difference  bag_b = ", $bag_b->difference($bag_b),   "\n";
+    print "bag_a     sum      bag_b = ", $bag_a->sum($bag_b),          "\n";
+    print "bag_a  difference  bag_b = ", $bag_a->difference($bag_b),   "\n";
 
     print "bag_a    union     bag_b = ", $bag_a->union($bag_b),        "\n";
     print "bag_a intersection bag_b = ", $bag_a->intersection($bag_b), "\n";
@@ -45,8 +45,8 @@ $VERSION = 1.010;
 
     print "bag_b = $bag_b\n";
 
-    print "bag_a + bag_b = ", $bag_b + $bag_b, "\n";  # Sum
-    print "bag_a - bag_b = ", $bag_b - $bag_b, "\n";  # Difference
+    print "bag_a + bag_b = ", $bag_a + $bag_b, "\n";  # Sum
+    print "bag_a - bag_b = ", $bag_a - $bag_b, "\n";  # Difference
 
     print "bag_a | bag_b = ", $bag_a | $bag_b, "\n";  # Union
     print "bag_a & bag_b = ", $bag_a & $bag_b, "\n";  # Intersection
@@ -60,15 +60,19 @@ $VERSION = 1.010;
     print "-bag_b = ", -$bag_b"\n";     # Complement
 
     $bag_c->delete(apples => 5);      # Would abort.
+
     print "Can",          # Cannot ...
           $bag_c->over_delete() ? "" : "not",
           " over delete from bag_c\n";
+
     $bag_c->over_delete(1);
     print "Can",          # Can ...
           $bag_c->over_delete() ? "" : "not",
           " over delete from bag_c\n";
     $bag_c->delete(apples => 5);      # Would succeed.
+
     print $bag_c, "\n";         # ()
+
 
 =head1 DESCRIPTION
 
